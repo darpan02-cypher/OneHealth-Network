@@ -1,0 +1,167 @@
+﻿<!doctype html>
+<html>
+<head>
+{% load static %}
+<meta charset="utf-8">
+<link type="text/css" rel="stylesheet" href="{% static 'patientcontact/jslib/jquery-ui.min.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'patientcontact/jslib/jquery-ui.theme.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'patientcontact/style.css' %}" />
+<script src="{% static 'patientcontact/jslib/jquery-3.1.1.min.js' %}"></script>
+<script src="{% static 'patientcontact/jslib/jquery.validate.js' %}"></script>
+<script src="{% static 'patientcontact/jslib/jquery-ui.min.js' %}"></script>
+
+<script type="text/javascript">
+
+function getValidationRules() {
+    return {
+        rules: {
+            contFirstName: "required",
+            contLastName: "required",
+            contAddress: {
+                required: true,
+                minlength: 10
+            },
+            contCity: {
+                required: true,
+                minlength: 5
+            },
+            contState: {
+                required: true
+            },
+            contZip: {
+                required: true,
+                minlength: 5
+            },
+            contPhoneMain: {
+                required: true,
+                minlength: 10
+            },
+            contPhoneCell: {
+                required: true,
+                minlength: 10
+            },
+            contEmail: {
+                required: true,
+                email: true
+            }
+        },
+        messages: {
+            contFirstName: "Please enter your first name!",
+            contLastName: "Please enter your last name!",
+            contAddress: {
+                required: "Please enter an address!",
+                minlength: "Your address must consist of at least 10 characters"
+            },
+            contCity: {
+                required: "Please enter your city!",
+                minlength: "Your city must be at least 5 characters long!"
+            },
+            contState: {
+                required: "Please select your state!"
+            },
+            contZip: {
+                required: "Please enter your zipcode!",
+                minlength: "Your zipcode must be a 5 digit number!"
+            },
+            contPhoneMain: {
+                required: "Please enter your home phone!",
+                minlength: "Your home phone number should be 10 digits!"
+            },
+            contPhoneCell: {
+                required: "Please enter your cell phone!",
+                minlength: "Your cell phone number should be 10 digits!"
+            },
+            contEmail: {
+                required: "Please enter your email address!",
+                email: "Please enter a valid email address!"
+            }
+        }
+    };
+}
+
+$().ready(function() {
+    $("#patientContactInfoConfirm").dialog({ 
+        autoOpen: false,
+        resizable: true,
+        modal: false,
+        height: "auto",
+        width: 600
+    });
+    
+    $( "#contState" ).selectmenu({
+        width: 270
+    });
+    
+    var validator = $("#patientContactForm").validate(getValidationRules());
+    
+    $("#patientContactForm").on('submit', function (e) {
+        e.preventDefault();
+        if (validator.form()) {
+            $.ajax({
+                type:'post',
+                data:$('#patientContactForm').serialize(),
+                success:function(){}
+            });
+            var form1 = $('#patientContactForm'), 
+                form2 = $('#patientContactInfoConfirmForm'); 
+            $(':input[name]', form2).val(function(){
+                return $(':input[name='+ this.name +']', form1).val();
+            });
+            $("#patientContactInfoConfirm").dialog("open");
+        }
+    });
+});
+
+</script>
+</head>
+
+<body>
+<div class="contactinfo-page">
+    <div class="form">
+        <form id="patientContactForm">
+            {% csrf_token %}
+            <table class="cols3">
+                <tr>
+                    <td colspan="4">
+                        <h1><div align="center"> Contact Information </div></h1>
+                    </td>
+                </tr>
+                {% include 'patientcontact/form_fields.html' %}
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>
+                        <div style="width:300px; margin-top:5px;">
+                            <input type="submit" value="Save">
+                            <a class="message" href="{% url 'dashboard:index'%}">
+                                <div style="width:110px; display:inline-block; margin-left:4px; padding: 14px; text-align:center; border:1px solid #4CAF50">
+                                    Dashboard
+                                </div>
+                            </a>
+                        </div>
+                    </td>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<div id="patientContactInfoConfirm" title="Confirmation">
+    <div class="contactinfo-page">
+        <div class="form">
+            <form id="patientContactInfoConfirmForm" action="{% url 'patientcontact:saveContactInfo'%}" method="post">
+                {% csrf_token %}
+                <table class="cols2">
+                    {% include 'patientcontact/form_fields.html' %}
+                    <tr>
+                        <td></td>
+                        <td> <input type="submit" value="Save"/> </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
